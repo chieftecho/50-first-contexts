@@ -78,10 +78,26 @@ Structure your PRD as JSON with a `passes` field for each task:
       "description": "REST endpoints for user CRUD",
       "acceptanceCriteria": "All endpoints return correct status codes",
       "passes": false
+    },
+    {
+      "id": "3",
+      "title": "Fix low-priority SonarQube issue",
+      "description": "Refactor legacy module to remove code smell",
+      "acceptanceCriteria": "SonarQube issue resolved",
+      "passes": false,
+      "rejected": {
+        "timestamp": "2024-01-16T10:30:00Z",
+        "reason": "Refactoring this module would require changes to 15+ dependent files with high regression risk. The code smell has no functional impact. Risk accepted."
+      }
     }
   ]
 }
 ```
+
+Task states:
+- `passes: false` — Not yet completed
+- `passes: true` — Completed successfully  
+- `rejected` — Task intentionally skipped with timestamp and reason (e.g., risk accepted, low priority vs. high effort, would cause more problems than it solves)
 
 Tips for good PRD items:
 - **Atomic**: One logical unit of work per task
