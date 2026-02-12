@@ -52,6 +52,81 @@ export SSH_DIR="$HOME/.ssh"
 4. The loop checks for `<promise>COMPLETE</promise>` to exit early
 5. Volume is cleaned up after each iteration
 
+## Creating Good PRD and Progress Files
+
+The quality of your autonomous run depends entirely on how well you define the work. Lucy reads `prd.json` and `progress.txt` to understand what to do and what's already done.
+
+### prd.json
+
+Structure your PRD as JSON with a `passes` field for each task:
+
+```json
+{
+  "title": "My Feature",
+  "branchName": "lucy/my-feature",
+  "stories": [
+    {
+      "id": "1",
+      "title": "Setup database schema",
+      "description": "Create tables for users and sessions",
+      "acceptanceCriteria": "Migrations run successfully, tables exist",
+      "passes": false
+    },
+    {
+      "id": "2", 
+      "title": "Add API endpoints",
+      "description": "REST endpoints for user CRUD",
+      "acceptanceCriteria": "All endpoints return correct status codes",
+      "passes": false
+    }
+  ]
+}
+```
+
+Tips for good PRD items:
+- **Atomic**: One logical unit of work per task
+- **Verifiable**: Clear acceptance criteria Lucy can check
+- **Ordered**: Respect dependencies (setup before features)
+- **Small**: Prefer many small tasks over few large ones — smaller tasks mean tighter feedback loops and less context rot
+
+### progress.txt
+
+Lucy appends to this file after each iteration. It serves as memory between fresh contexts:
+
+```
+# Progress Log
+Started: 2024-01-15
+
+---
+## Iteration 1
+- Completed: Story 1 - Setup database schema
+- Created migrations in db/migrations/
+- Ran `npm run migrate` successfully
+- Committed: abc123
+
+## Iteration 2
+- Completed: Story 2 - Add API endpoints
+- Added routes in src/routes/users.ts
+- All tests passing
+- Committed: def456
+```
+
+What to track:
+- Tasks completed with PRD reference
+- Key decisions and reasoning
+- Files changed
+- Blockers or notes for next iteration
+
+### Best Practices
+
+1. **Define "done" explicitly** — vague tasks lead to shortcuts or infinite loops
+2. **Prioritize risky tasks first** — architectural decisions and integrations before polish
+3. **Use feedback loops** — types, tests, and linting catch issues between iterations
+4. **Start with HITL** — watch the first few iterations before going fully autonomous
+5. **Keep scope tight** — Ralph/Lucy works best for proof of concepts with clear boundaries
+
+For more tips, see [Tips for AI Coding with Ralph Wiggum](https://www.aihero.dev/tips-for-ai-coding-with-ralph-wiggum) and the [Ralph Loop Quickstart](https://github.com/coleam00/ralph-loop-quickstart).
+
 ## Files
 
 - `lucy.sh` - Main loop script
@@ -74,3 +149,11 @@ export SSH_DIR="$HOME/.ssh"
 cd test
 ./run.sh
 ```
+
+## Future Ideas
+
+- **PostgreSQL backend** — Store PRD and progress in a database for concurrent workers, with task locking (timestamp-based) and release, and timestamps for pass/fail status
+- **Progress UI** — Web interface to visualize iteration progress, task status, and logs
+- **Orchestrator mode** — Use a local kiro-cli instance to coordinate multiple worker containers
+- **Specialized agents** — Agent configs and prompts tailored for specific task types (testing, refactoring, documentation, etc.)
+- **Network isolation** — Additional security features to restrict container network access
